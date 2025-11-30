@@ -1,38 +1,91 @@
-# gg
+這是一個為你的專案量身打造的 `README.md`。它包含了專案簡介、技術棧、安裝教學以及檔案結構說明。
 
-This template should help get you started developing with Vue 3 in Vite.
+你可以將以下內容複製並儲存為專案根目錄下的 `README.md` 檔案。
 
-## Recommended IDE Setup
+***
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+# 🌿 AI 濫用 & 碳排放量儀表板 (AI & Carbon Emission Dashboard)
 
-## Recommended Browser Setup
+這是一個基於 **Vue 3** 與 **Tailwind CSS** 開發的現代化儀表板專案。
+本專案還原了 Figma 設計稿，實現了響應式佈局 (Responsive Design)、SVG 圖表繪製與模擬數據串接。
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+![Dashboard Preview](https://via.placeholder.com/1200x600?text=Dashboard+Screenshot)
+*(建議在此處放上你剛剛完成的儀表板截圖，例如將圖片存為 `screenshot.png` 並連結)*
 
-## Customize configuration
+## ✨ 特色 (Features)
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+*   **⚡️ Vue 3 Composition API**: 使用 `<script setup>` 語法糖，程式碼簡潔高效。
+*   **🎨 Tailwind CSS v3**: 極速刻板，無需撰寫傳統 CSS，包含自定義陰影與圓角設計。
+*   **📊 純 CSS/SVG 圖表**:
+    *   **折線圖**: 使用 SVG `<path>` 手繪數據曲線，不需安裝肥大的圖表套件 (如 Chart.js)。
+    *   **圓餅圖**: 使用 CSS `conic-gradient` 實現輕量化甜甜圈圖。
+*   **📱 響應式佈局**: 支援 Grid (網格) 與 Flexbox 排版，適應不同螢幕尺寸。
+*   **🔄 模擬 API**: 透過 `mockData.js` 模擬後端數據流，結構清晰。
 
-## Project Setup
+## 🛠 技術棧 (Tech Stack)
 
-```sh
+*   [Vue.js 3](https://vuejs.org/) - 前端框架
+*   [Vite](https://vitejs.dev/) - 建置工具
+*   [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS 框架
+
+## 🚀 快速開始 (Getting Started)
+
+### 1. 安裝環境
+請確保你的電腦已安裝 [Node.js](https://nodejs.org/) (建議 v16 以上)。
+
+### 2. 下載專案與安裝套件
+```bash
+# 進入專案資料夾
+cd my-dashboard
+
+# 安裝依賴套件
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
+### 3. 確保 Tailwind CSS 版本正確
+由於 Tailwind v4 與 v3 初始化方式不同，本專案使用 **v3** 版本。若遇到 `init` 錯誤，請執行：
+```bash
+npm install -D tailwindcss@3 postcss autoprefixer
+npx tailwindcss init -p
 ```
 
-### Compile and Minify for Production
+### 4. 啟動開發伺服器
+```bash
+npm run dev
+```
+啟動後，瀏覽器打開終端機顯示的網址 (通常是 `http://localhost:5173`) 即可看到畫面。
 
-```sh
-npm run build
+## 📂 檔案結構說明 (Project Structure)
+
+```text
+my-dashboard/
+├── src/
+│   ├── api/
+│   │   └── mockData.js      # 模擬後端回傳的 JSON 數據 (卡片數值、通知、列表)
+│   ├── assets/
+│   │   └── main.css         # 引入 Tailwind 的主要樣式檔
+│   ├── App.vue              # 主要頁面邏輯、佈局與圖表繪製 (Template/Script)
+│   └── main.js              # Vue 入口檔案
+├── index.html               # 網頁入口
+├── tailwind.config.js       # Tailwind 設定檔 (設定 Content 路徑)
+└── package.json             # 專案資訊與套件列表
+```
+
+## 📝 重點程式碼解析
+
+### SVG 線圖 (Line Chart)
+位於 `App.vue` 中，不依賴外部套件，直接使用 SVG 繪製：
+```html
+<svg viewBox="0 0 100 100">
+  <path d="..." stroke="#38BDF8" ... /> <!-- 藍線 -->
+  <path d="..." stroke="#F87171" ... /> <!-- 紅線 -->
+</svg>
+```
+
+### 圓餅圖 (Donut Chart)
+使用 CSS `conic-gradient` 屬性繪製：
+```html
+<div style="background: conic-gradient(#8B5CF6 0% 20%, #F87171 20% 30% ...)">
+  <!-- 中間覆蓋白色圓形形成甜甜圈效果 -->
+</div>
 ```
