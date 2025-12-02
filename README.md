@@ -1,10 +1,7 @@
-這是一個為你的專案量身打造的 `README.md`。它包含了專案簡介、技術棧、安裝教學以及檔案結構說明。
-
-你可以將以下內容複製並儲存為專案根目錄下的 `README.md` 檔案。
-
-***
-
-# 🌿 AI 濫用 & 碳排放量儀表板 (AI & Carbon Emission Dashboard)
+# TangibleAI 碳吉寶
+<p align="center">
+🌿 AI 濫用 & 碳排放量儀表板 (AI & Carbon Emission Dashboard)
+</p>
 
 這是一個基於 **Vue 3** 與 **Tailwind CSS** 開發的現代化儀表板專案。
 本專案還原了 Figma 設計稿，實現了響應式佈局 (Responsive Design)、SVG 圖表繪製與模擬數據串接。
@@ -16,10 +13,6 @@
 
 *   **⚡️ Vue 3 Composition API**: 使用 `<script setup>` 語法糖，程式碼簡潔高效。
 *   **🎨 Tailwind CSS v3**: 極速刻板，無需撰寫傳統 CSS，包含自定義陰影與圓角設計。
-*   **📊 純 CSS/SVG 圖表**:
-    *   **折線圖**: 使用 SVG `<path>` 手繪數據曲線，不需安裝肥大的圖表套件 (如 Chart.js)。
-    *   **圓餅圖**: 使用 CSS `conic-gradient` 實現輕量化甜甜圈圖。
-*   **📱 響應式佈局**: 支援 Grid (網格) 與 Flexbox 排版，適應不同螢幕尺寸。
 *   **🔄 模擬 API**: 透過 `mockData.js` 模擬後端數據流，結構清晰。
 
 ## 🛠 技術棧 (Tech Stack)
@@ -36,7 +29,7 @@
 ### 2. 下載專案與安裝套件
 ```bash
 # 進入專案資料夾
-cd my-dashboard
+cd TangibleAI
 
 # 安裝依賴套件
 npm install
@@ -51,7 +44,7 @@ npx tailwindcss init -p
 
 ### 4. 啟動開發伺服器
 ```bash
-npm run dev
+npm run dev -- --host
 ```
 啟動後，瀏覽器打開終端機顯示的網址 (通常是 `http://localhost:5173`) 即可看到畫面。
 
@@ -69,23 +62,4 @@ my-dashboard/
 ├── index.html               # 網頁入口
 ├── tailwind.config.js       # Tailwind 設定檔 (設定 Content 路徑)
 └── package.json             # 專案資訊與套件列表
-```
-
-## 📝 重點程式碼解析
-
-### SVG 線圖 (Line Chart)
-位於 `App.vue` 中，不依賴外部套件，直接使用 SVG 繪製：
-```html
-<svg viewBox="0 0 100 100">
-  <path d="..." stroke="#38BDF8" ... /> <!-- 藍線 -->
-  <path d="..." stroke="#F87171" ... /> <!-- 紅線 -->
-</svg>
-```
-
-### 圓餅圖 (Donut Chart)
-使用 CSS `conic-gradient` 屬性繪製：
-```html
-<div style="background: conic-gradient(#8B5CF6 0% 20%, #F87171 20% 30% ...)">
-  <!-- 中間覆蓋白色圓形形成甜甜圈效果 -->
-</div>
 ```
