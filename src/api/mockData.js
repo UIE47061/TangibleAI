@@ -33,11 +33,11 @@ export const getCompanyData = () => {
       { 
         title: "縮減 System Prompt 長度", 
         impact: "High", 
-        desc: "您的系統提示詞重複度高，優化後可減少 15% 用量。", 
+        desc: "您的系統提示詞重複度高，優化後可減少 10% 用量。", 
         save: "120 kg CO2e" 
       },
       { 
-        title: "更換為 GPT-3.5-Turbo", 
+        title: "更換為 GPT-4.1-mini 模型", 
         impact: "Med", 
         desc: "非推理型任務建議降級模型，效率更高。", 
         save: "45 kg CO2e" 
