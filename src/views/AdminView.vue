@@ -53,32 +53,36 @@ onMounted(() => {
           <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider">基礎係數設定</h4>
           <div v-for="(conf, idx) in adminData.engineConfig" :key="idx" class="flex justify-between items-center group">
             <label class="text-sm text-slate-700">{{ conf.key }}</label>
-            <input type="text" :value="conf.value" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-sm font-mono text-right w-24 focus:ring-2 focus:ring-slate-500 outline-none group-hover:border-slate-400 transition">
+            <input type="text" :value="conf.value"
+              class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-sm font-mono text-right w-24 focus:ring-2 focus:ring-slate-500 outline-none group-hover:border-slate-400 transition">
           </div>
           <div class="pt-4">
             <button class="text-blue-600 text-sm font-bold hover:underline">+ 新增係數變數</button>
           </div>
         </div>
-        
+
         <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
           <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">演算法測試區</h4>
           <p class="text-xs text-slate-500 mb-4">輸入測試 Token 量與模型，預覽計算結果。</p>
           <div class="flex gap-2 mb-2">
             <input type="text" placeholder="Tokens (e.g. 1000)" class="border rounded px-2 py-1 text-sm flex-1">
             <select class="border rounded px-2 py-1 text-sm">
+              <option>GPT-5</option>
               <option>GPT-4</option>
-              <option>GPT-3.5</option>
-              <option>Claude 2</option>
+              <option>Gemini 3 pro</option>
+              <option>Claude Sonnet 4.5</option>
             </select>
           </div>
           <div class="bg-slate-800 text-emerald-400 p-3 rounded font-mono text-sm mt-2">
             Output: 0.42 kg CO2e
           </div>
-          <button class="w-full bg-slate-200 text-slate-600 rounded py-2 text-sm font-bold mt-2 hover:bg-slate-300">執行模擬</button>
+          <button
+            class="w-full bg-slate-200 text-slate-600 rounded py-2 text-sm font-bold mt-2 hover:bg-slate-300">執行模擬</button>
         </div>
       </div>
       <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
-        <button class="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-slate-700">儲存設定變更</button>
+        <button
+          class="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-slate-700">儲存設定變更</button>
       </div>
     </div>
   </div>

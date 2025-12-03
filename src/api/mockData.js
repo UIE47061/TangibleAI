@@ -158,11 +158,25 @@ export const getSystemAdminData = () => {
         { id: 2, name: '美國', flag: '🇺🇸', factor: '0.386', year: '2024' },
         { id: 3, name: '歐盟', flag: '🇪🇺', factor: '0.295', year: '2024' },
       ],
+      // 供應商列表
+      vendors: [
+        { id: 'openai', name: 'OpenAI' },
+        { id: 'anthropic', name: 'Anthropic' },
+        { id: 'google', name: 'Google' },
+      ],
+      // 模型列表 (單位: kg CO2e per 1K tokens)
       modelRates: [
-        { id: 1, name: 'GPT-4', rate: '0.035' },
-        { id: 2, name: 'GPT-3.5', rate: '0.012' },
-        { id: 3, name: 'Claude-3', rate: '0.028' },
-        { id: 4, name: 'Gemini-Pro', rate: '0.022' },
+        { id: 1, vendor: 'openai', name: 'GPT-4', rate: '0.035' },
+        { id: 2, vendor: 'openai', name: 'GPT-3.5', rate: '0.012' },
+        { id: 3, vendor: 'openai', name: 'GPT-5', rate: '0.00044' }, // 0.07-0.8g 取中間值 0.44g = 0.00044kg
+        { id: 4, vendor: 'openai', name: 'GPT-5-Codex Preview', rate: '0.00055' }, // 0.1-1.0g 取中間值 0.55g = 0.00055kg
+        { id: 5, vendor: 'anthropic', name: 'Claude Sonnet 3.5', rate: '0.028' },
+        { id: 6, vendor: 'anthropic', name: 'Claude Sonnet 4', rate: '0.000325' }, // 0.05-0.6g 取中間值 0.325g = 0.000325kg
+        { id: 7, vendor: 'anthropic', name: 'Claude Sonnet 4.5', rate: '0.00038' }, // 0.06-0.7g 取中間值 0.38g = 0.00038kg
+        { id: 8, vendor: 'anthropic', name: 'Claude Haiku 4.5', rate: '0.00011' }, // 0.02-0.2g 取中間值 0.11g = 0.00011kg
+        { id: 9, vendor: 'google', name: 'Gemini Pro', rate: '0.022' },
+        { id: 10, vendor: 'google', name: 'Gemini 2.5 Pro', rate: '0.00027' }, // 0.04-0.5g 取中間值 0.27g = 0.00027kg
+        { id: 11, vendor: 'google', name: 'Gemini 3 Pro Preview', rate: '0.000325' }, // 0.05-0.6g 取中間值 0.325g = 0.000325kg
       ]
     },
     

@@ -1,13 +1,44 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { getSystemAdminData } from '@/api/mockData';
 
 const adminData = ref(null);
 const activeTab = ref('monitoring'); // monitoring, engine, users
 
+// 測試計算器的狀態
+const selectedVendor = ref('');
+const selectedModel = ref('');
+const tokenAmount = ref(10000);
+
 onMounted(() => {
   adminData.value = getSystemAdminData();
+  // 預設選擇第一個供應商
+  if (adminData.value.engine.vendors.length > 0) {
+    selectedVendor.value = adminData.value.engine.vendors[0].id;
+  }
 });
+
+// 根據選擇的供應商篩選模型
+const filteredModels = computed(() => {
+  if (!adminData.value || !selectedVendor.value) return [];
+  return adminData.value.engine.modelRates.filter(
+    model => model.vendor === selectedVendor.value
+  );
+});
+
+// 計算碳排放結果
+const calculatedResult = computed(() => {
+  if (!selectedModel.value || !tokenAmount.value) return '0.00';
+  const model = adminData.value.engine.modelRates.find(m => m.id === selectedModel.value);
+  if (!model) return '0.00';
+  const result = (parseFloat(model.rate) * tokenAmount.value / 1000).toFixed(2);
+  return result;
+});
+
+// 當供應商改變時,重置模型選擇
+const handleVendorChange = () => {
+  selectedModel.value = '';
+};
 </script>
 
 <template>
@@ -317,11 +348,12 @@ onMounted(() => {
         </div>
         <div class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-3">
+            <!-- 模型列表 -->
+            <div class="space-y-3 max-h-96 overflow-y-auto">
               <div v-for="model in adminData.engine.modelRates" :key="model.id" class="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-blue-300">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
-                    {{ model.name.split('-')[0] }}
+                    {{ model.name.split(' ')[0].substring(0, 3) }}
                   </div>
                   <div>
                     <div class="font-medium text-slate-800">{{ model.name }}</div>
@@ -334,6 +366,8 @@ onMounted(() => {
                 </div>
               </div>
             </div>
+            
+            <!-- 測試計算器 -->
             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <div class="flex items-center gap-2 mb-3">
                 <!-- Font Awesome: 計算器圖標 -->
@@ -341,23 +375,48 @@ onMounted(() => {
                 <h4 class="font-bold text-blue-900">測試計算器</h4>
               </div>
               <div class="space-y-3">
+                <!-- 供應商選擇 -->
                 <div>
-                  <label class="text-xs text-slate-600 block mb-1">選擇模型</label>
-                  <select class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    <option v-for="model in adminData.engine.modelRates" :key="model.id">{{ model.name }}</option>
+                  <label class="text-xs text-slate-600 block mb-1">選擇供應商</label>
+                  <select 
+                    v-model="selectedVendor" 
+                    @change="handleVendorChange"
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">請選擇供應商</option>
+                    <option v-for="vendor in adminData.engine.vendors" :key="vendor.id" :value="vendor.id">
+                      {{ vendor.name }}
+                    </option>
                   </select>
                 </div>
+                
+                <!-- 模型選擇 -->
+                <div>
+                  <label class="text-xs text-slate-600 block mb-1">選擇模型</label>
+                  <select 
+                    v-model="selectedModel" 
+                    :disabled="!selectedVendor"
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm disabled:bg-slate-100 disabled:cursor-not-allowed">
+                    <option value="">請選擇模型</option>
+                    <option v-for="model in filteredModels" :key="model.id" :value="model.id">
+                      {{ model.name }}
+                    </option>
+                  </select>
+                </div>
+                
+                <!-- Token 數量 -->
                 <div>
                   <label class="text-xs text-slate-600 block mb-1">Token 數量</label>
-                  <input type="number" value="10000" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
+                  <input 
+                    v-model.number="tokenAmount" 
+                    type="number" 
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
                 </div>
+                
+                <!-- 計算結果 -->
                 <div class="bg-slate-800 text-white p-3 rounded-lg">
                   <div class="text-xs text-slate-300 mb-1">計算結果</div>
-                  <div class="text-2xl font-bold font-mono">0.35 kg CO2e</div>
+                  <div class="text-2xl font-bold font-mono">{{ calculatedResult }} kg CO2e</div>
                 </div>
-                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-bold transition">
-                  重新計算
-                </button>
               </div>
             </div>
           </div>
