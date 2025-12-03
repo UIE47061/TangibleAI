@@ -1,13 +1,30 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getCompanyData } from '@/api/mockData';
+import { exportCompanyESGReport } from '@/utils/pdfExport';
 import EmissionChart from '@/components/EmissionChart.vue';
 
 const companyData = ref(null);
+const isExporting = ref(false);
 
 onMounted(() => {
   companyData.value = getCompanyData();
 });
+
+// 導出 ESG 報告
+const handleExportReport = async () => {
+  if (!companyData.value || isExporting.value) return;
+  
+  isExporting.value = true;
+  try {
+    await exportCompanyESGReport(companyData.value);
+  } catch (error) {
+    console.error('導出失敗:', error);
+    alert('導出 PDF 失敗,請稍後再試');
+  } finally {
+    isExporting.value = false;
+  }
+};
 </script>
 
 <template>
@@ -21,8 +38,12 @@ onMounted(() => {
         </div>
         <p class="text-slate-500">這裡是您的 AI 碳排效率總覽</p>
       </div>
-      <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition shadow-sm">
-        匯出 ESG 報告
+      <button 
+        @click="handleExportReport" 
+        :disabled="isExporting"
+        class="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+        <span v-if="isExporting">導出中...</span>
+        <span v-else>導出 ESG 報告</span>
       </button>
     </div>
 

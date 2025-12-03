@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { getSystemAdminData } from '@/api/mockData';
+import { exportSystemReport } from '@/utils/pdfExport';
 
 const adminData = ref(null);
 const activeTab = ref('monitoring'); // monitoring, engine, users
+const isExporting = ref(false);
 
 // 測試計算器的狀態
 const selectedVendor = ref('');
@@ -38,6 +40,21 @@ const calculatedResult = computed(() => {
 // 當供應商改變時,重置模型選擇
 const handleVendorChange = () => {
   selectedModel.value = '';
+};
+
+// 導出報告
+const handleExportReport = async () => {
+  if (!adminData.value || isExporting.value) return;
+  
+  isExporting.value = true;
+  try {
+    await exportSystemReport(adminData.value);
+  } catch (error) {
+    console.error('導出失敗:', error);
+    alert('導出 PDF 失敗，請稍後再試');
+  } finally {
+    isExporting.value = false;
+  }
 };
 </script>
 
@@ -128,8 +145,12 @@ const handleVendorChange = () => {
             <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg text-slate-600 transition">
               刷新狀態
             </button>
-            <button class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition">
-              匯出報告
+            <button 
+              @click="handleExportReport" 
+              :disabled="isExporting"
+              class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="isExporting">導出中...</span>
+              <span v-else>導出報告</span>
             </button>
           </div>
         </div>

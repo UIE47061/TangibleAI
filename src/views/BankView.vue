@@ -1,12 +1,29 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { getBankData } from '@/api/mockData';
+import { exportBankReport } from '@/utils/pdfExport';
 
 const bankData = ref(null);
+const isExporting = ref(false);
 
 onMounted(() => {
   bankData.value = getBankData();
 });
+
+// 下載報表
+const handleDownloadReport = async () => {
+  if (!bankData.value || isExporting.value) return;
+  
+  isExporting.value = true;
+  try {
+    await exportBankReport(bankData.value);
+  } catch (error) {
+    console.error('下載失敗:', error);
+    alert('下載 PDF 失敗，請稍後再試');
+  } finally {
+    isExporting.value = false;
+  }
+};
 </script>
 
 <template>
@@ -17,7 +34,13 @@ onMounted(() => {
         <p class="text-slate-500">ESG 風險模型與授信定價參考</p>
       </div>
       <div class="flex gap-2">
-        <button class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50">下載報表</button>
+        <button 
+          @click="handleDownloadReport" 
+          :disabled="isExporting"
+          class="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span v-if="isExporting">下載中...</span>
+          <span v-else>下載報表</span>
+        </button>
         <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm">調整模型權重</button>
       </div>
     </div>
