@@ -183,24 +183,23 @@ const sortedByWaste = computed(() => {
         <button class="px-3 py-1.5 rounded-md text-slate-400 hover:text-slate-600 transition">季度</button>
       </div>
     </div>
-    
+
     <!-- 圖表 -->
     <v-chart :option="option" style="height: 280px;" autoresize />
-    
+
     <!-- 排行榜 -->
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- 效率排行榜 -->
       <div class="bg-gradient-to-br from-emerald-50 to-white p-4 rounded-xl border border-emerald-100">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-            </svg>
+            <!-- Font Awesome: 星星閃爍圖標 -->
+            <i class="fa-solid fa-ranking-star w-5 h-5 text-white"></i>
           </div>
-          <h3 class="font-bold text-slate-800 text-sm">🏆 效率排行榜</h3>
+          <h3 class="font-bold text-slate-800 text-sm">效率排行榜</h3>
         </div>
         <div class="space-y-2">
-          <div v-for="(dept, idx) in sortedByEfficiency" :key="dept.name" 
+          <div v-for="(dept, idx) in sortedByEfficiency" :key="dept.name"
             class="flex items-center justify-between p-2 rounded-lg transition hover:bg-white">
             <div class="flex items-center gap-2">
               <span :class="['text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center', 
@@ -225,14 +224,13 @@ const sortedByWaste = computed(() => {
       <div class="bg-gradient-to-br from-red-50 to-white p-4 rounded-xl border border-red-100">
         <div class="flex items-center gap-2 mb-3">
           <div class="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center">
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-            </svg>
+            <!-- Font Awesome: 三角形警告圖標 -->
+            <i class="fa-solid fa-triangle-exclamation w-5 h-5 text-white"></i>
           </div>
-          <h3 class="font-bold text-slate-800 text-sm">⚠️ 需改善排行</h3>
+          <h3 class="font-bold text-slate-800 text-sm">需改善排行</h3>
         </div>
         <div class="space-y-2">
-          <div v-for="(dept, idx) in sortedByWaste" :key="dept.name" 
+          <div v-for="(dept, idx) in sortedByWaste" :key="dept.name"
             class="flex items-center justify-between p-2 rounded-lg transition hover:bg-white">
             <div class="flex items-center gap-2">
               <span :class="['text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center', 
@@ -274,12 +272,14 @@ const sortedByWaste = computed(() => {
             </td>
             <td class="py-2 px-3 text-right font-mono text-slate-600">{{ dept.usage.toLocaleString() }}</td>
             <td class="py-2 px-3 text-right">
-              <span class="font-bold" :class="dept.efficiency >= 8 ? 'text-emerald-600' : dept.efficiency >= 6 ? 'text-blue-600' : 'text-red-600'">
+              <span class="font-bold"
+                :class="dept.efficiency >= 8 ? 'text-emerald-600' : dept.efficiency >= 6 ? 'text-blue-600' : 'text-red-600'">
                 {{ dept.efficiency }}/10
               </span>
             </td>
             <td class="py-2 px-3 text-right font-mono text-slate-600">{{ dept.emission }} kg</td>
-            <td class="py-2 px-3 text-right font-mono text-slate-500">{{ (dept.emission / dept.usage * 1000).toFixed(2) }}</td>
+            <td class="py-2 px-3 text-right font-mono text-slate-500">{{ (dept.emission / dept.usage * 1000).toFixed(2)
+              }}</td>
           </tr>
         </tbody>
       </table>

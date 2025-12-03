@@ -66,9 +66,8 @@ const handleLogin = () => {
                 :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': error }"
               >
               <p v-if="error" class="mt-2 text-sm text-red-600 flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <!-- Font Awesome: 錯誤警告圖標 (圓圈驚嘆號) -->
+                <i class="fa-solid fa-circle-exclamation w-4 h-4"></i>
                 {{ error }}
               </p>
             </div>
@@ -79,10 +78,8 @@ const handleLogin = () => {
               :disabled="loading"
               class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <svg v-if="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <!-- Font Awesome: 載入中圖標 (旋轉的圓圈) -->
+              <i v-if="loading" class="fa-solid fa-spinner fa-spin h-5 w-5 text-white"></i>
               <span>{{ loading ? '登入中...' : '登入' }}</span>
             </button>
           </form>
@@ -92,9 +89,8 @@ const handleLogin = () => {
         <div class="bg-slate-50 p-6 border-t border-slate-200">
           <div class="text-xs text-slate-600 space-y-2">
             <div class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+              <!-- Font Awesome: 提示資訊圖標 (圓圈i) -->
+              <i class="fa-solid fa-circle-info w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0"></i>
               <div>
                 <p class="font-medium text-slate-700 mb-1">登入提示：</p>
                 <ul class="space-y-1 text-slate-600">
@@ -115,9 +111,8 @@ const handleLogin = () => {
           class="bg-white hover:bg-emerald-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm font-medium transition shadow-sm hover:shadow-md"
         >
           <div class="flex flex-col items-center gap-1">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
+            <!-- Font Awesome: 企業建築圖標 -->
+            <i class="fa-solid fa-building w-5 h-5"></i>
             <span>企業端</span>
           </div>
         </button>
@@ -126,9 +121,8 @@ const handleLogin = () => {
           class="bg-white hover:bg-blue-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm font-medium transition shadow-sm hover:shadow-md"
         >
           <div class="flex flex-col items-center gap-1">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
-            </svg>
+            <!-- Font Awesome: 銀行建築圖標 -->
+            <i class="fa-solid fa-landmark w-5 h-5"></i>
             <span>銀行端</span>
           </div>
         </button>
@@ -137,9 +131,8 @@ const handleLogin = () => {
           class="bg-white hover:bg-purple-50 border border-slate-200 text-slate-700 px-4 py-3 rounded-lg text-sm font-medium transition shadow-sm hover:shadow-md"
         >
           <div class="flex flex-col items-center gap-1">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
+            <!-- Font Awesome: 系統設定齒輪圖標 -->
+            <i class="fa-solid fa-gear w-5 h-5"></i>
             <span>系統商</span>
           </div>
         </button>
