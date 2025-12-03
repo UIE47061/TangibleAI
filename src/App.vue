@@ -1,204 +1,93 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { getDashboardData } from './api/mockData';
-import EmissionChart from './components/EmissionChart.vue';
-import UsagePieChart from './components/UsagePieChart.vue';
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
-const data = ref(null);
+const route = useRoute()
+const currentRole = ref('company') // 預設企業端
 
-onMounted(() => {
-  data.value = getDashboardData();
-});
+// 監聽路由變化，記住當前角色
+watch(() => route.path, (newPath) => {
+  if (newPath.startsWith('/company')) {
+    currentRole.value = 'company'
+  } else if (newPath.startsWith('/bank')) {
+    currentRole.value = 'bank'
+  } else if (newPath.startsWith('/system-admin')) {
+    currentRole.value = 'system-admin'
+  }
+  // /admin 不改變 currentRole，保持之前的角色
+}, { immediate: true })
+
+const Icons = {
+  Company: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>`,
+  Bank: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>`,
+  Admin: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`,
+};
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#F4F7FE] p-6 font-sans text-slate-600 flex justify-center pb-20" v-if="data">
+  <div v-if="$route.path === '/'" class="min-h-screen">
+    <router-view />
+  </div>
+  <div v-else class="min-h-screen bg-slate-50 font-sans text-slate-600 pb-20">
     
-    <!-- 限制最大寬度 (1440px) -->
-    <div class="w-full max-w-[1440px]"> 
-
-      <!-- Header -->
-      <header class="bg-white rounded-2xl px-6 py-4 mb-6 shadow-sm flex justify-between items-center">
-        <h1 class="text-xl font-bold text-slate-800 tracking-tight">AI濫用 & 碳排放量儀表板</h1>
-        <div class="flex items-center gap-5">
-          <button class="hover:bg-gray-50 p-2 rounded-full transition">
-            <i class="fas fa-cog text-gray-400 hover:text-gray-600 transition"></i>
-          </button>
-          <button class="hover:bg-gray-50 p-2 rounded-full transition relative">
-            <i class="fas fa-bell text-gray-400 hover:text-gray-600 transition"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-          </button>
-          <div class="w-9 h-9 rounded-full bg-slate-800 overflow-hidden border border-slate-100 shadow-sm cursor-pointer hover:ring-2 hover:ring-blue-100 transition">
-            <img src="https://i.pravatar.cc/150?img=12" alt="Admin" />
-          </div>
-        </div>
-      </header>
-
-      <!-- Grid 系統：4 欄設計 -->
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-
-        <!-- 1. 頂部四個卡片 -->
-        <template v-for="(stat, index) in data.stats" :key="index">
-          <div class="bg-white rounded-2xl p-5 shadow-sm relative flex flex-col justify-between min-h-[140px] hover:-translate-y-1 transition duration-300">
-            <div class="flex justify-between items-start">
-              <h3 class="text-slate-500 font-bold text-xs uppercase tracking-wider">{{ stat.title }}</h3>
-              <img v-if="stat.hasProfile" :src="stat.user.avatar" class="w-10 h-10 rounded-full border border-slate-50" />
-            </div>
-
-            <div class="mt-2">
-              <div v-if="stat.hasProfile">
-                 <div class="font-bold text-lg text-slate-800">{{ stat.user.name }}</div>
-                 <div class="text-xs text-slate-400">{{ stat.user.emission }}</div>
-              </div>
-              <div v-else>
-                 <div class="text-3xl font-bold text-slate-800 tracking-tight">
-                   {{ stat.value }} <span class="text-xs font-normal text-slate-400 ml-1">{{ stat.unit }}</span>
-                 </div>
-                 <div class="text-xs text-slate-400 mt-1">{{ stat.subText }}</div>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between mt-auto pt-4 border-t border-slate-50/50">
-               <span v-if="stat.footerText" class="text-emerald-500 text-xs font-bold">{{stat.footerText}}</span>
-               <span v-else></span>
-               <div class="flex items-center gap-1 text-sm font-bold" 
-                    :class="stat.trend === 'up' ? 'text-red-500' : 'text-emerald-500'">
-                    <span v-if="stat.trendValue">{{ stat.trendValue }}</span>
-                    <span v-if="stat.subText && stat.hasProfile" class="text-slate-400 text-[10px] font-normal">vs 上個月</span>
-                    <i :class="stat.trend === 'up' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-               </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- 2. 左側主要區塊 (佔總寬 75%, 3 欄) -->
-        <div class="lg:col-span-3 flex flex-col gap-6">
-          
-          <!-- (A) 碳排追蹤儀表表 (佔滿左側區塊) -->
-          <EmissionChart :chart-data="data" />
-
-          <!-- (B) 列表與圓餅圖 (Grid: 2:1) -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-             
-             <!-- 1. 濫用使用者 (佔 2 欄 = 總寬 50%) -->
-             <div class="md:col-span-2 bg-white rounded-2xl p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-4">
-                  <h2 class="text-lg font-bold text-slate-800">濫用使用者</h2>
-                  <button class="text-xs text-blue-500 hover:underline">View All</button>
-                </div>
-                
-                <div class="overflow-x-auto">
-                  <table class="w-full text-xs text-left">
-                    <thead class="text-slate-400 bg-slate-50 rounded-lg">
-                      <tr>
-                        <th class="py-2 pl-3 font-medium rounded-l">使用者</th>
-                        <th class="py-2 font-medium text-center">濫用數</th>
-                        <th class="py-2 font-medium text-right">Token</th>
-                        <th class="py-2 pr-3 font-medium text-right rounded-r">狀態</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="user in data.misuseUsers" :key="user.name" class="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
-                        <td class="py-3 pl-3 flex items-center gap-3">
-                          <img :src="user.avatar" class="w-8 h-8 rounded-full bg-gray-100" />
-                          <span class="text-slate-700 font-bold">{{ user.name }}</span>
-                        </td>
-                        <td class="py-3 text-slate-500 font-mono text-center">{{ user.count }}</td>
-                        <td class="py-3 text-slate-500 font-mono text-right">{{ user.usage }}</td>
-                        <td class="py-3 pr-3 text-right">
-                          <span :class="`${user.statusColor} text-white px-2.5 py-1 rounded-md text-[10px] font-bold shadow-sm`">{{ user.status }}</span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-             </div>
-
-             <!-- 2. 圓餅圖 (佔 1 欄 = 總寬 25%) -->
-             <UsagePieChart :data="data.usageDistribution" />
-          </div>
-        </div>
-
-        <!-- 3. 右側通知區塊 (佔總寬 25%, 1 欄) -->
-        <div class="lg:col-span-1 bg-white rounded-2xl p-6 shadow-sm flex flex-col h-full">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-bold text-slate-800">通知事件</h2>
-            <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded cursor-pointer hover:bg-slate-200 transition">已讀</span>
-          </div>
-
-          <div class="flex-1 flex flex-col gap-5 overflow-y-auto custom-scrollbar pr-2">
-            <div v-for="note in data.notifications" :key="note.id" class="flex gap-3 group">
-              <div class="w-9 h-9 min-w-[2.25rem] rounded-full flex items-center justify-center text-white shrink-0 shadow-sm transition-transform group-hover:scale-105"
-                   :class="{
-                     'bg-red-400': note.type === 'alert',
-                     'bg-[#38BDF8]': note.type === 'mail',
-                     'bg-[#FBBF24]': note.type === 'warning',
-                     'bg-emerald-500': note.type === 'success'
-                   }">
-                 <i v-if="note.type === 'success'" class="fas fa-check"></i>
-                 <i v-else-if="note.type === 'mail'" class="fas fa-envelope"></i>
-                 <i v-else class="fas fa-exclamation"></i>
-              </div>
-              <div class="text-xs text-slate-600 leading-relaxed pt-1">
-                {{ note.text }}
-              </div>
-            </div>
+    <!-- 頂部導航：角色切換器 -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-2 font-bold text-xl text-emerald-600 tracking-tight">
+            <img src="./assets/icon.png" width="35"> TangibleAI
           </div>
           
-          <button class="w-full bg-[#38BDF8] hover:bg-sky-500 text-white rounded-xl py-3 mt-4 text-sm font-bold shadow-blue-200 shadow-lg transition">查看所有通知</button>
-        </div>
+          <!-- 企業端 Tab -->
+          <div v-if="currentRole === 'company'" class="flex bg-slate-100 p-1 rounded-lg">
+            <router-link to="/company" 
+              :class="['flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition', $route.path === '/company' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700']">
+              <span v-html="Icons.Company"></span> 企業儀表板
+            </router-link>
+            <router-link to="/admin"
+              :class="['flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition', $route.path === '/admin' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700']">
+              <span v-html="Icons.Admin"></span> 後台管理
+            </router-link>
+          </div>
 
-        <!-- 4. 底部事件 (跨欄) -->
-        <div class="lg:col-span-4 bg-white rounded-2xl p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-slate-800 mb-4">最近濫用事件</h2>
-          <div class="bg-slate-50 rounded-xl p-4 md:px-8 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-slate-100 transition duration-300 border border-slate-100">
-            <!-- User -->
-            <div class="flex items-center gap-4">
-              <img :src="data.recentEvent.avatar" class="w-12 h-12 rounded-full border-2 border-white shadow-sm" />
-              <div>
-                <div class="font-bold text-slate-800 text-lg">{{ data.recentEvent.user }}</div>
-                <div class="text-sm text-slate-500 font-medium">Model: {{ data.recentEvent.model }}</div>
-              </div>
-            </div>
-            
-            <!-- Data -->
-            <div class="flex gap-16 border-l border-slate-200 pl-8 ml-0 md:ml-4">
-               <div>
-                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">CO2排放量</div>
-                 <div class="font-bold text-xl text-slate-700 font-mono">{{ data.recentEvent.emission }}</div>
-               </div>
-               <div>
-                 <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">時長</div>
-                 <div class="font-bold text-xl text-slate-700 font-mono">{{ data.recentEvent.duration }}</div>
-               </div>
-            </div>
-            
-            <!-- Actions -->
-            <div class="flex gap-3">
-               <button class="bg-[#F87171] hover:bg-red-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-red-200 shadow-md transition">
-                 {{ data.recentEvent.reasonBtn }}
-               </button>
-               <button class="bg-[#38BDF8] hover:bg-sky-500 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-blue-200 shadow-md transition">
-                 查看詳細資訊
-               </button>
-            </div>
+          <!-- 銀行端 Tab -->
+          <div v-else-if="currentRole === 'bank'" class="flex bg-slate-100 p-1 rounded-lg">
+            <router-link to="/bank" 
+              :class="['flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition', $route.path === '/bank' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700']">
+              <span v-html="Icons.Bank"></span> 銀行儀表板
+            </router-link>
+            <router-link to="/admin"
+              :class="['flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition', $route.path === '/admin' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700']">
+              <span v-html="Icons.Admin"></span> 後台管理
+            </router-link>
+          </div>
+
+          <!-- 系統商 Tab -->
+          <div v-else-if="currentRole === 'system-admin'" class="flex bg-slate-100 p-1 rounded-lg">
+            <router-link to="/system-admin"
+              :class="['flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition', $route.path === '/system-admin' ? 'bg-white text-purple-600 shadow-sm' : 'text-slate-500 hover:text-slate-700']">
+              <span v-html="Icons.Admin"></span> 系統管理
+            </router-link>
           </div>
         </div>
-
       </div>
-    </div>
+    </nav>
+
+    <!-- 主內容區 -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
+      <router-view />
+    </main>
   </div>
 </template>
 
-<style>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+<style scoped>
+/* 簡單的淡入動畫 */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
-  border-radius: 10px;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
