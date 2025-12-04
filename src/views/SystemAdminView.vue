@@ -1,13 +1,61 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { getSystemAdminData } from '@/api/mockData';
+import { exportSystemReport } from '@/utils/pdfExport';
 
 const adminData = ref(null);
 const activeTab = ref('monitoring'); // monitoring, engine, users
+const isExporting = ref(false);
+
+// 測試計算器的狀態
+const selectedVendor = ref('');
+const selectedModel = ref('');
+const tokenAmount = ref(10000);
 
 onMounted(() => {
   adminData.value = getSystemAdminData();
+  // 預設選擇第一個供應商
+  if (adminData.value.engine.vendors.length > 0) {
+    selectedVendor.value = adminData.value.engine.vendors[0].id;
+  }
 });
+
+// 根據選擇的供應商篩選模型
+const filteredModels = computed(() => {
+  if (!adminData.value || !selectedVendor.value) return [];
+  return adminData.value.engine.modelRates.filter(
+    model => model.vendor === selectedVendor.value
+  );
+});
+
+// 計算碳排放結果
+const calculatedResult = computed(() => {
+  if (!selectedModel.value || !tokenAmount.value) return '0.00';
+  const model = adminData.value.engine.modelRates.find(m => m.id === selectedModel.value);
+  if (!model) return '0.00';
+  const result = (parseFloat(model.rate) * tokenAmount.value / 1000).toFixed(2);
+  return result;
+});
+
+// 當供應商改變時,重置模型選擇
+const handleVendorChange = () => {
+  selectedModel.value = '';
+};
+
+// 導出報告
+const handleExportReport = async () => {
+  if (!adminData.value || isExporting.value) return;
+  
+  isExporting.value = true;
+  try {
+    await exportSystemReport(adminData.value);
+  } catch (error) {
+    console.error('導出失敗:', error);
+    alert('導出 PDF 失敗，請稍後再試');
+  } finally {
+    isExporting.value = false;
+  }
+};
 </script>
 
 <template>
@@ -35,27 +83,24 @@ onMounted(() => {
         @click="activeTab = 'monitoring'"
         :class="['flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition', 
           activeTab === 'monitoring' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700']">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-        </svg>
+        <!-- Font Awesome: 柱狀圖/統計圖標 -->
+        <i class="fa-solid fa-chart-column w-4 h-4"></i>
         資料監控
       </button>
       <button 
         @click="activeTab = 'engine'"
         :class="['flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition', 
           activeTab === 'engine' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700']">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-        </svg>
+        <!-- Font Awesome: 齒輪/設定圖標 -->
+        <i class="fa-solid fa-gear w-4 h-4"></i>
         AI Carbon Engine
       </button>
       <button 
         @click="activeTab = 'users'"
         :class="['flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition', 
           activeTab === 'users' ? 'border-blue-500 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700']">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-        </svg>
+        <!-- Font Awesome: 多位使用者/使用者群組圖標 -->
+        <i class="fa-solid fa-users w-4 h-4"></i>
         使用者管理
       </button>
     </div>
@@ -92,17 +137,20 @@ onMounted(() => {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
-            </svg>
+            <!-- Font Awesome: 網路連線圖標 -->
+            <i class="fa-solid fa-wifi w-5 h-5 text-slate-700"></i>
             <h3 class="font-bold text-slate-800">企業 SDK/API 資料上傳狀態</h3>
           </div>
           <div class="flex gap-2">
             <button class="text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg text-slate-600 transition">
               刷新狀態
             </button>
-            <button class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition">
-              匯出報告
+            <button 
+              @click="handleExportReport" 
+              :disabled="isExporting"
+              class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+              <span v-if="isExporting">導出中...</span>
+              <span v-else>導出報告</span>
             </button>
           </div>
         </div>
@@ -163,9 +211,8 @@ onMounted(() => {
       <!-- 異常事件列表 -->
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-red-50 flex items-center gap-2">
-          <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
+          <!-- Font Awesome: 三角形警告圖標 -->
+          <i class="fa-solid fa-triangle-exclamation w-5 h-5 text-red-600"></i>
           <h3 class="font-bold text-red-800">最近異常事件</h3>
         </div>
         <div class="divide-y divide-slate-100">
@@ -218,9 +265,8 @@ onMounted(() => {
         <div class="bg-white rounded-xl shadow-sm border border-slate-200">
           <div class="p-4 border-b border-slate-200 bg-slate-50">
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-              </svg>
+              <!-- Font Awesome: 滑桿調整圖標 -->
+              <i class="fa-solid fa-sliders w-5 h-5 text-slate-700"></i>
               <h3 class="font-bold text-slate-800">基礎係數配置</h3>
             </div>
           </div>
@@ -244,9 +290,8 @@ onMounted(() => {
         <div class="bg-white rounded-xl shadow-sm border border-slate-200">
           <div class="p-4 border-b border-slate-200 bg-slate-50">
             <div class="flex items-center gap-2">
-              <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
-              </svg>
+              <!-- Font Awesome: 晶片/處理器圖標 -->
+              <i class="fa-solid fa-microchip w-5 h-5 text-slate-700"></i>
               <h3 class="font-bold text-slate-800">GPU 模型設定</h3>
             </div>
           </div>
@@ -285,9 +330,8 @@ onMounted(() => {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <!-- Font Awesome: 地球圖標 -->
+            <i class="fa-solid fa-earth-americas w-5 h-5 text-slate-700"></i>
             <h3 class="font-bold text-slate-800">區域電力排放因子</h3>
           </div>
           <button class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg transition">
@@ -318,19 +362,19 @@ onMounted(() => {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-slate-50">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
+            <!-- Font Awesome: 柱狀圖/統計圖標 -->
+            <i class="fa-solid fa-chart-column w-5 h-5 text-slate-700"></i>
             <h3 class="font-bold text-slate-800">碳排換算率校準</h3>
           </div>
         </div>
         <div class="p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-3">
+            <!-- 模型列表 -->
+            <div class="space-y-3 max-h-96 overflow-y-auto">
               <div v-for="model in adminData.engine.modelRates" :key="model.id" class="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:border-blue-300">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
-                    {{ model.name.split('-')[0] }}
+                    {{ model.name.split(' ')[0].substring(0, 3) }}
                   </div>
                   <div>
                     <div class="font-medium text-slate-800">{{ model.name }}</div>
@@ -343,31 +387,57 @@ onMounted(() => {
                 </div>
               </div>
             </div>
+            
+            <!-- 測試計算器 -->
             <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
               <div class="flex items-center gap-2 mb-3">
-                <svg class="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
+                <!-- Font Awesome: 計算器圖標 -->
+                <i class="fa-solid fa-calculator w-5 h-5 text-blue-700"></i>
                 <h4 class="font-bold text-blue-900">測試計算器</h4>
               </div>
               <div class="space-y-3">
+                <!-- 供應商選擇 -->
                 <div>
-                  <label class="text-xs text-slate-600 block mb-1">選擇模型</label>
-                  <select class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    <option v-for="model in adminData.engine.modelRates" :key="model.id">{{ model.name }}</option>
+                  <label class="text-xs text-slate-600 block mb-1">選擇供應商</label>
+                  <select 
+                    v-model="selectedVendor" 
+                    @change="handleVendorChange"
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    <option value="">請選擇供應商</option>
+                    <option v-for="vendor in adminData.engine.vendors" :key="vendor.id" :value="vendor.id">
+                      {{ vendor.name }}
+                    </option>
                   </select>
                 </div>
+                
+                <!-- 模型選擇 -->
+                <div>
+                  <label class="text-xs text-slate-600 block mb-1">選擇模型</label>
+                  <select 
+                    v-model="selectedModel" 
+                    :disabled="!selectedVendor"
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm disabled:bg-slate-100 disabled:cursor-not-allowed">
+                    <option value="">請選擇模型</option>
+                    <option v-for="model in filteredModels" :key="model.id" :value="model.id">
+                      {{ model.name }}
+                    </option>
+                  </select>
+                </div>
+                
+                <!-- Token 數量 -->
                 <div>
                   <label class="text-xs text-slate-600 block mb-1">Token 數量</label>
-                  <input type="number" value="10000" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
+                  <input 
+                    v-model.number="tokenAmount" 
+                    type="number" 
+                    class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono">
                 </div>
+                
+                <!-- 計算結果 -->
                 <div class="bg-slate-800 text-white p-3 rounded-lg">
                   <div class="text-xs text-slate-300 mb-1">計算結果</div>
-                  <div class="text-2xl font-bold font-mono">0.35 kg CO2e</div>
+                  <div class="text-2xl font-bold font-mono">{{ calculatedResult }} kg CO2e</div>
                 </div>
-                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-bold transition">
-                  重新計算
-                </button>
               </div>
             </div>
           </div>
@@ -402,9 +472,8 @@ onMounted(() => {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
+            <!-- Font Awesome: 使用者群組圖標 -->
+            <i class="fa-solid fa-users w-5 h-5 text-slate-700"></i>
             <h3 class="font-bold text-slate-800">帳號管理</h3>
           </div>
           <div class="flex gap-2">
@@ -473,9 +542,8 @@ onMounted(() => {
       <div class="bg-white rounded-xl shadow-sm border border-slate-200">
         <div class="p-4 border-b border-slate-200 bg-slate-50">
           <div class="flex items-center gap-2">
-            <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-            </svg>
+            <!-- Font Awesome: 鑰匙圖標 -->
+            <i class="fa-solid fa-key w-5 h-5 text-slate-700"></i>
             <h3 class="font-bold text-slate-800">API 金鑰 & 流量監控</h3>
           </div>
         </div>
