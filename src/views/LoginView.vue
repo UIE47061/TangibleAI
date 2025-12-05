@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-// 三端配置陣列
+// 兩端配置陣列
 const endpoints = [
   {
     id: 'company',
@@ -25,16 +25,6 @@ const endpoints = [
     selectedBg: 'bg-blue-50',
     selectedBorder: 'border-blue-500',
     color: 'text-blue-600'
-  },
-  {
-    id: 'system',
-    name: '系統商',
-    route: '/system-admin',
-    icon: 'fa-gear',
-    hoverColor: 'hover:bg-purple-50',
-    selectedBg: 'bg-purple-50',
-    selectedBorder: 'border-purple-500',
-    color: 'text-purple-600'
   }
 ];
 
@@ -88,7 +78,7 @@ const handleLogin = () => {
           <p class="text-slate-500 text-sm mb-6">請選擇您的身份並輸入密碼</p>
           
           <!-- 端點選擇按鈕 -->
-          <div class="mb-6 grid grid-cols-3 gap-3">
+          <div class="mb-6 grid grid-cols-2 gap-3">
             <button 
               v-for="endpoint in endpoints" 
               :key="endpoint.id"
